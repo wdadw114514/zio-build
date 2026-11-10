@@ -59,18 +59,18 @@ public final class Lang {
    }
 
    private static String lookup(String text) {
+      if (isModuleName(text)) {
+         return text;
+      }
       LanguageTable table = ClientContext.languageTable;
       if (table == null) {
          return text;
       }
       String translated = table.translate(text);
-      if (translated == text || translated.equals(text)) {
-         return text;
+      if (!translated.equals(text)) {
+         return translated;
       }
-      if (isModuleName(text)) {
-         return text;
-      }
-      return translated;
+      return table.translateFragments(text);
    }
 
    /** Translates a raw string, returning it untouched when no entry exists. */
