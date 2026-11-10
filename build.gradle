@@ -1,0 +1,130 @@
+plugins {
+    id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
+    id 'idea'
+}
+
+base { archivesName = 'zio' }
+
+repositories {
+    mavenCentral()
+    maven {
+        url = 'https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1'
+        content { includeGroup 'me.djtheredstoner' }
+    }
+    maven {
+        url = 'https://api.modrinth.com/maven'
+        content { includeGroup 'maven.modrinth' }
+    }
+    ivy {
+        url = 'https://raw.githubusercontent.com/m1919810/SlimefunHelper/1.21.11/libs'
+        patternLayout { artifact 'baritone-meteor-[revision].jar' }
+        metadataSources { artifact() }
+        content { includeModule 'meteordevelopment', 'baritone' }
+    }
+}
+
+configurations {
+    baritoneDistribution { transitive = false }
+    viaDistribution { transitive = false }
+    entityCullingDistribution { transitive = false }
+}
+
+def baritone = providers.provider {
+    def jar = configurations.baritoneDistribution.singleFile
+    def sha256 = java.security.MessageDigest.getInstance('SHA-256').digest(jar.bytes).encodeHex().toString()
+    if (sha256 != '3e8c7ab86b7c0148f8711ca2e7cb608712dbc2a97253de0f131ec3db41a2bd3c') {
+        throw new GradleException('Baritone download does not match the pinned upstream release')
+    }
+    jar
+}
+
+def nestedLibraries = { configuration, patterns ->
+    files(providers.provider {
+        zipTree(configuration.singleFile).matching(patterns).files
+    })
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+
+    modCompileOnly 'maven.modrinth:viafabricplus:YzQYJEjP'
+    modLocalRuntime 'maven.modrinth:viafabricplus:YzQYJEjP'
+    modCompileOnly 'maven.modrinth:lithium:Ow7wA0kG'
+    modCompileOnly 'maven.modrinth:immediatelyfast:QwkfUKSj'
+    modCompileOnly 'maven.modrinth:sodium:RB7CDjTS'
+    modCompileOnly 'maven.modrinth:xaeros-minimap:62EynHPJ'
+    modCompileOnly 'maven.modrinth:entityculling:CTabrwB1'
+    modLocalRuntime 'maven.modrinth:entityculling:CTabrwB1'
+    modLocalRuntime 'me.djtheredstoner:DevAuth-fabric:1.2.2'
+    compileOnly 'org.jetbrains:annotations:26.0.2'
+
+    baritoneDistribution 'meteordevelopment:baritone:1.21.11'
+    viaDistribution 'maven.modrinth:viafabricplus:YzQYJEjP'
+    entityCullingDistribution 'maven.modrinth:entityculling:CTabrwB1'
+
+    modCompileOnly files(baritone)
+    modLocalRuntime files(baritone)
+    implementation nestedLibraries(configurations.baritoneDistribution) {
+        include 'META-INF/jars/*.jar'
+    }
+    implementation nestedLibraries(configurations.viaDistribution) {
+        include 'META-INF/jars/*.jar'
+        exclude 'META-INF/jars/fabric-*.jar', 'META-INF/jars/gson-2*.jar',
+            'META-INF/jars/viafabricplus-*.jar'
+    }
+    modCompileOnly nestedLibraries(configurations.viaDistribution) {
+        include 'META-INF/jars/viafabricplus-*.jar'
+    }
+    modLocalRuntime nestedLibraries(configurations.entityCullingDistribution) {
+        include 'META-INF/jars/*.jar'
+    }
+    runtimeOnly 'dev.kastle.webrtc:webrtc-java:1.0.3:macos-x86_64'
+}
+
+loom {
+    accessWidenerPath = file('src/main/resources/zio.accesswidener')
+    runs {
+        client {
+            client()
+            name = 'Zio Source'
+            runDir = 'run'
+            ideConfigGenerated = true
+        }
+    }
+}
+
+processResources {
+    inputs.property 'version', project.version
+    filesMatching('fabric.mod.json') { expand version: project.version }
+}
+
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(21) }
+    withSourcesJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 21
+    options.encoding = 'UTF-8'
+    options.compilerArgs += ['-proc:none']
+    options.fork = true
+    options.forkOptions.memoryMaximumSize = '4g'
+}
+
+tasks.named('remapJar') {
+    def serviceOptions = tinyRemapperServiceOptions.get()
+    serviceOptions.classpath.setFrom(sourceSets.main.compileClasspath)
+    tinyRemapperServiceOptions.set(serviceOptions)
+}
+
+tasks.named('runClient') {
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+}
+
+idea.module {
+    excludeDirs += files('run', '.gradle')
+    downloadSources = true
+}

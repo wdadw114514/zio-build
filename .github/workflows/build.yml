@@ -1,0 +1,44 @@
+name: build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21 (compile toolchain)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up JDK 25 (Gradle / Loom runtime)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Show versions
+        run: |
+          java -version
+          echo "JDK21=$JAVA_HOME_21_X64"
+
+      - name: Grant execute permission
+        run: chmod +x gradlew
+
+      - name: Build
+        run: ./gradlew build --no-daemon --stacktrace -Dorg.gradle.java.installations.paths="$JAVA_HOME_21_X64"
+
+      - name: List artifacts
+        run: ls -lh build/libs
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zio-jar
+          path: build/libs/*.jar
+          if-no-files-found: error
