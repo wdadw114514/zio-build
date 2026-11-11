@@ -52,9 +52,6 @@ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 @Mixin(AbstractContainerScreen.class)
 public class AbstractContainerScreenMixin implements ClientAccess {
-   private static final ChestSearchBarModule zio$chestSearchBar = ClientContext.getModule(ChestSearchBarModule.class);
-   private static final TooltipsModule zio$tooltips = ClientContext.getModule(TooltipsModule.class);
-   private static final InventoryTweaksModule zio$inventoryTweaks = ClientContext.getModule(InventoryTweaksModule.class);
    @Shadow
    @Nullable
    protected Slot hoveredSlot;
@@ -81,8 +78,8 @@ public class AbstractContainerScreenMixin implements ClientAccess {
    public void zio$preventInventoryCloseDuringSearch(
       KeyEvent keyEvent, CallbackInfoReturnable<Boolean> callback
    ) {
-      if (zio$chestSearchBar != null
-         && zio$chestSearchBar.isToggled()
+      if (ClientContext.getModule(ChestSearchBarModule.class) != null
+         && ClientContext.getModule(ChestSearchBarModule.class).isToggled()
          && ChestSearchController.searchBox != null
          && ChestSearchController.searchBox.isFocused()
          && ClientAccess.zioMinecraft.options.keyInventory.matches(keyEvent)) {
@@ -128,7 +125,7 @@ public class AbstractContainerScreenMixin implements ClientAccess {
       double mouseX, double mouseY, CallbackInfoReturnable<Slot> callback
    ) {
       if (this.zio$cachedHoveredSlot != null
-         && zio$tooltips.shouldInspectContents(
+         && ClientContext.getModule(TooltipsModule.class).shouldInspectContents(
             this.zio$cachedHoveredSlot.getItem()
          )) {
          callback.setReturnValue(this.zio$cachedHoveredSlot);
@@ -138,7 +135,7 @@ public class AbstractContainerScreenMixin implements ClientAccess {
    @ModifyExpressionValue(method = "mouseClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;hasClickedOutside(DDII)Z"))
    public boolean zio$keepInspectedClickInside(boolean originalInside) {
       return (this.zio$cachedHoveredSlot == null
-         || !zio$tooltips.shouldInspectContents(this.zio$cachedHoveredSlot.getItem()))
+         || !ClientContext.getModule(TooltipsModule.class).shouldInspectContents(this.zio$cachedHoveredSlot.getItem()))
          && originalInside;
    }
 
@@ -149,7 +146,7 @@ public class AbstractContainerScreenMixin implements ClientAccess {
    private void zio$useBundleInspectButton(Args arguments) {
       int mouseButton = arguments.<Integer>get(2);
       if (this.zio$cachedHoveredSlot != null
-         && zio$tooltips.shouldInspectContents(
+         && ClientContext.getModule(TooltipsModule.class).shouldInspectContents(
             this.zio$cachedHoveredSlot.getItem()
          )
          && mouseButton == 0
@@ -167,8 +164,8 @@ public class AbstractContainerScreenMixin implements ClientAccess {
    private void zio$swapBundleReleaseButton(Args arguments) {
       Slot slot = arguments.get(0);
       int mouseButton = arguments.<Integer>get(2);
-      if (zio$inventoryTweaks.isToggled()
-         && zio$inventoryTweaks.shouldSwapBundleClickButton(
+      if (ClientContext.getModule(InventoryTweaksModule.class).isToggled()
+         && ClientContext.getModule(InventoryTweaksModule.class).shouldSwapBundleClickButton(
             slot, mouseButton
          )) {
          arguments.set(
@@ -189,7 +186,7 @@ public class AbstractContainerScreenMixin implements ClientAccess {
       GuiGraphics graphics, Font font, List text, Optional image, int tooltipX, int tooltipY, Identifier background
    ) {
       if (this.zio$cachedHoveredSlot != null
-         && zio$tooltips.shouldInspectContents(
+         && ClientContext.getModule(TooltipsModule.class).shouldInspectContents(
             this.zio$cachedHoveredSlot.getItem()
          )) {
          tooltipX = this.zio$tooltipX;
@@ -245,8 +242,8 @@ public class AbstractContainerScreenMixin implements ClientAccess {
    private boolean zio$shouldRenderSlotItem(
       GuiGraphics graphics, ItemStack stack, int itemX, int itemY, int seed
    ) {
-      return !zio$tooltips.isToggled()
-         || !zio$tooltips.mapOverlaySetting.getValue()
+      return !ClientContext.getModule(TooltipsModule.class).isToggled()
+         || !ClientContext.getModule(TooltipsModule.class).mapOverlaySetting.getValue()
          || this.zio$slotMapData == null;
    }
 
@@ -257,7 +254,7 @@ public class AbstractContainerScreenMixin implements ClientAccess {
    private boolean zio$renderMapOverlay(
       GuiGraphics graphics, Font font, ItemStack stack, int itemX, int itemY, String countText, @Local(argsOnly = true) Slot slot
    ) {
-      if (!zio$tooltips.isToggled() || !zio$tooltips.mapOverlaySetting.getValue() || this.zio$slotMapData == null) {
+      if (!ClientContext.getModule(TooltipsModule.class).isToggled() || !ClientContext.getModule(TooltipsModule.class).mapOverlaySetting.getValue() || this.zio$slotMapData == null) {
          return true;
       }
       ContainerTooltipComponent.renderMapOverlay(

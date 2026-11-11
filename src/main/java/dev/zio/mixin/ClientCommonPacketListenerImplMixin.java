@@ -22,11 +22,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ClientCommonPacketListenerImpl.class)
 public abstract class ClientCommonPacketListenerImplMixin implements PacketListener {
-   private static final NoPacketKickModule noPacketKickModule = ClientContext.getModule(NoPacketKickModule.class);
 
    @Inject(method = "onDisconnect", at = @At("HEAD"), cancellable = true)
    public void suppressDecoderExceptionDisconnect(DisconnectionDetails details, CallbackInfo callback) {
-      if (noPacketKickModule.isToggled()
+      if (ClientContext.getModule(NoPacketKickModule.class).isToggled()
          && this.protocol() == ConnectionProtocol.PLAY
          && details.reason().getString().contains("io.netty.handler.codec.DecoderException")) {
          callback.cancel();

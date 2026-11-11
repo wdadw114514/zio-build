@@ -23,7 +23,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LocalPlayer.class)
 public class LocalPlayerMixin {
-   private static final SprintModule sprintModule = ClientContext.getModule(SprintModule.class);
    @Unique
    private boolean aiStepInputActive;
    @Unique
@@ -39,8 +38,8 @@ public class LocalPlayerMixin {
          .post(event);
       this.itemUseSlowdownCancelled = event.isCancelled();
       this.aiStepInputActive = true;
-      if (sprintModule.isToggled()
-         && sprintModule.shouldDeferToVanillaSprinting()) {
+      if (ClientContext.getModule(SprintModule.class).isToggled()
+         && ClientContext.getModule(SprintModule.class).shouldDeferToVanillaSprinting()) {
          SprintModule.forceSprintKeyDown = true;
       }
    }

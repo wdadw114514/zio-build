@@ -21,14 +21,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(WorldBorderRenderer.class)
 public class WorldBorderRendererMixin {
-   private static final NoRenderModule noRenderModule = ClientContext.getModule(NoRenderModule.class);
 
    @Inject(method = "render", at = @At("HEAD"), cancellable = true)
    private void suppressWorldBorder(
       WorldBorderRenderState borderState, Vec3 cameraPosition, double ignoredRenderDouble1, double ignoredRenderDouble2, CallbackInfo callback
    ) {
-      if (noRenderModule.isToggled()
-         && noRenderModule.worldBorderSetting.getValue()) {
+      if (ClientContext.getModule(NoRenderModule.class).isToggled()
+         && ClientContext.getModule(NoRenderModule.class).worldBorderSetting.getValue()) {
          callback.cancel();
       }
    }

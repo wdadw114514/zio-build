@@ -38,7 +38,6 @@ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 @Mixin(EquipmentLayerRenderer.class)
 public class EquipmentLayerRendererMixin {
    @Unique
-   private static final NoRenderModule noRenderModule = ClientContext.getModule(NoRenderModule.class);
    @Unique
    private LayerType currentLayerType;
 
@@ -72,8 +71,8 @@ public class EquipmentLayerRendererMixin {
          Color originalColor = new Color(
             arguments.<Integer>get(6)
          );
-         float opacity = noRenderModule.getArmorOpacity()
-            * noRenderModule.getEntityAlpha();
+         float opacity = ClientContext.getModule(NoRenderModule.class).getArmorOpacity()
+            * ClientContext.getModule(NoRenderModule.class).getEntityAlpha();
          arguments.set(
             6,
             ColorUtils.withAlpha(originalColor, opacity).hashCode()
@@ -92,8 +91,8 @@ public class EquipmentLayerRendererMixin {
          return originalType;
       }
 
-      float opacity = noRenderModule.getArmorOpacity()
-         * noRenderModule.getEntityAlpha();
+      float opacity = ClientContext.getModule(NoRenderModule.class).getArmorOpacity()
+         * ClientContext.getModule(NoRenderModule.class).getEntityAlpha();
       return opacity == 1.0F ? originalType : RenderTypes.entityTranslucent(texture);
    }
 
@@ -102,8 +101,8 @@ public class EquipmentLayerRendererMixin {
       at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;get(Lnet/minecraft/core/component/DataComponentType;)Ljava/lang/Object;")
    )
    private Object suppressArmorTrim(Object originalTrim) {
-      return noRenderModule.isToggled()
-            && noRenderModule.armorTrimSetting.getValue()
+      return ClientContext.getModule(NoRenderModule.class).isToggled()
+            && ClientContext.getModule(NoRenderModule.class).armorTrimSetting.getValue()
          ? null
          : originalTrim;
    }

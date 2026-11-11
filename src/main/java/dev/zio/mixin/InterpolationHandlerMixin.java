@@ -23,7 +23,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(InterpolationHandler.class)
 public abstract class InterpolationHandlerMixin {
-   private static final NoRenderModule noRenderModule = ClientContext.getModule(NoRenderModule.class);
    @Shadow
    @Final
    private Entity entity;
@@ -35,8 +34,8 @@ public abstract class InterpolationHandlerMixin {
    private void suppressEntityInterpolation(
       Vec3 position, float yaw, float pitch, CallbackInfo callback
    ) {
-      if (noRenderModule.isToggled()
-         && noRenderModule.interpolationSetting.getValue()) {
+      if (ClientContext.getModule(NoRenderModule.class).isToggled()
+         && ClientContext.getModule(NoRenderModule.class).interpolationSetting.getValue()) {
          this.entity.snapTo(position, yaw, pitch);
          this.cancel();
          callback.cancel();

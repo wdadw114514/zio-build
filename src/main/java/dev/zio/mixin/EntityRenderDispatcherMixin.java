@@ -32,20 +32,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(EntityRenderDispatcher.class)
 public class EntityRenderDispatcherMixin {
-   private static final NoRenderModule noRenderModule = ClientContext.getModule(NoRenderModule.class);
-   private static final ChamsModule chamsModule = ClientContext.getModule(ChamsModule.class);
 
    @ModifyExpressionValue(method = "submit", at = @At(value = "INVOKE", target = "Ljava/util/List;isEmpty()Z"))
    private static boolean applyEntityGlintAndShadow(
       boolean originalShadowFlag, @Local(argsOnly = true) EntityRenderState renderState
    ) {
-      if (chamsModule.shouldRenderGlintForEntity(
+      if (ClientContext.getModule(ChamsModule.class).shouldRenderGlintForEntity(
          EntityRenderStateAccess.getEntity(renderState)
       )) {
          return true;
       }
       return ClientContext.shaderRegistry.renderingIntoTarget
-         || noRenderModule.shouldHideEntityShadow()
+         || ClientContext.getModule(NoRenderModule.class).shouldHideEntityShadow()
          || originalShadowFlag;
    }
 
@@ -83,16 +81,16 @@ public class EntityRenderDispatcherMixin {
       EntityRenderState renderState, CameraRenderState cameraState, double x, double y, double z, PoseStack poses, SubmitNodeCollector collector, CallbackInfo callback
    ) {
       Entity entity = EntityRenderStateAccess.getEntity(renderState);
-      if (chamsModule.shouldRenderGlintForEntity(
+      if (ClientContext.getModule(ChamsModule.class).shouldRenderGlintForEntity(
          entity
       )) {
          renderState.displayFireAnimation = false;
       }
 
-      if (noRenderModule.isToggled()
-         && noRenderModule.fireSetting.getValue()
+      if (ClientContext.getModule(NoRenderModule.class).isToggled()
+         && ClientContext.getModule(NoRenderModule.class).fireSetting.getValue()
          && (
-            noRenderModule.othersSetting.getValue()
+            ClientContext.getModule(NoRenderModule.class).othersSetting.getValue()
                || entity instanceof LocalPlayer
                || entity instanceof EndCrystal
          )) {

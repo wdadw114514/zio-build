@@ -33,7 +33,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Connection.class)
 public class ConnectionMixin {
    private static NoPacketKickModule noPacketKickModule = ClientContext.getModule(NoPacketKickModule.class);
-   private static final PingSpoofModule pingSpoofModule = ClientContext.getModule(PingSpoofModule.class);
    @Shadow
    private Channel channel;
    @Shadow
@@ -48,7 +47,7 @@ public class ConnectionMixin {
       ChannelPipeline pipeline = context.pipeline();
       if (pipeline.get(PingSpoofDelayHandler.NAME) == null) {
          pipeline.addFirst(PingSpoofDelayHandler.NAME, new PingSpoofDelayHandler(
-            pingSpoofModule, () -> ((Connection)(Object)this).getPacketListener() instanceof ClientGamePacketListener
+            ClientContext.getModule(PingSpoofModule.class), () -> ((Connection)(Object)this).getPacketListener() instanceof ClientGamePacketListener
          ));
       }
    }

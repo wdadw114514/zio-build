@@ -24,7 +24,6 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.ARGB;
 
 public final class FontRenderer implements ClientAccess {
-   private static final NameProtectModule nameProtect = (NameProtectModule)ClientContext.getModule(NameProtectModule.class);
    public static final FontRenderer INSTANCE = new FontRenderer();
    private AtlasTextRenderer renderer;
 
@@ -89,7 +88,8 @@ public final class FontRenderer implements ClientAccess {
    }
 
    public float getWidth(String text) {
-      if (nameProtect.isToggled()
+      NameProtectModule nameProtect = ClientContext.getModule(NameProtectModule.class);
+      if (nameProtect != null && nameProtect.isToggled()
          && !this.isWorldUnavailable()) {
          text = nameProtect.protectNames(text);
       }

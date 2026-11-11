@@ -37,8 +37,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ClientPacketListener.class)
 public class ClientPacketListenerMixin {
-   private static final FastLatencyModule vanillaPingModule = ClientContext.getModule(FastLatencyModule.class);
-   private static final NoRenderModule noRenderModule = ClientContext.getModule(NoRenderModule.class);
 
    @Inject(
       method = "handleExplosion",
@@ -95,13 +93,13 @@ public class ClientPacketListenerMixin {
 
    @Inject(method = "handleAddEntity", at = @At("HEAD"), cancellable = true)
    private void suppressRemovedEntitySpawn(ClientboundAddEntityPacket packet, CallbackInfo callback) {
-      if (noRenderModule.isToggled()) {
+      if (ClientContext.getModule(NoRenderModule.class).isToggled()) {
          if (packet != null
             && packet.getType() != null
-            && noRenderModule.shouldHideEntityType(
+            && ClientContext.getModule(NoRenderModule.class).shouldHideEntityType(
                packet.getType()
             )
-            && noRenderModule.removalSetting.getValue()
+            && ClientContext.getModule(NoRenderModule.class).removalSetting.getValue()
                == NoRenderModule.RemovalChoice.FULL) {
             callback.cancel();
          }
@@ -150,7 +148,7 @@ public class ClientPacketListenerMixin {
 
    @ModifyExpressionValue(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/DebugScreenOverlay;showNetworkCharts()Z"))
    private boolean shouldShowNetworkCharts(boolean originalVisible) {
-      return vanillaPingModule.isVanillaPingEnabled()
+      return ClientContext.getModule(FastLatencyModule.class).isVanillaPingEnabled()
          ? false
          : originalVisible;
    }

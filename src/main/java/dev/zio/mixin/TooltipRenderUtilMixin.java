@@ -23,7 +23,6 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(TooltipRenderUtil.class)
 public class TooltipRenderUtilMixin {
-   private static final TooltipsModule tooltipsModule = ClientContext.getModule(TooltipsModule.class);
 
    @WrapWithCondition(
       method = "renderTooltipBackground",
@@ -36,8 +35,8 @@ public class TooltipRenderUtilMixin {
    private static boolean renderColoredTooltipSprite(
       GuiGraphics graphics, RenderPipeline pipeline, Identifier sprite, int x, int y, int width, int height
    ) {
-      Color tooltipColor = tooltipsModule.getTooltipColor();
-      if (tooltipsModule.isToggled() && tooltipColor != null) {
+      Color tooltipColor = ClientContext.getModule(TooltipsModule.class).getTooltipColor();
+      if (ClientContext.getModule(TooltipsModule.class).isToggled() && tooltipColor != null) {
          graphics.blitSprite(
             ClientRenderPipelines.POSITION_TEX_COLOR,
             sprite,

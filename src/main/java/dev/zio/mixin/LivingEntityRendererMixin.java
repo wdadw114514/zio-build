@@ -50,8 +50,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class LivingEntityRendererMixin implements ClientAccess {
    @Shadow
    protected EntityModel model;
-   private static final AnimationsModule animationsModule = ClientContext.getModule(AnimationsModule.class);
-   private static final NoRenderModule noRenderModule = ClientContext.getModule(NoRenderModule.class);
 
    @WrapWithCondition(
       method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/CameraRenderState;)V",
@@ -128,7 +126,7 @@ public abstract class LivingEntityRendererMixin implements ClientAccess {
    public boolean isPassengerForPlayerAnimation(
       boolean originalPassenger, @Local(argsOnly = true) LivingEntity entity
    ) {
-      return animationsModule.isStaticPlayerAnimationEnabled()
+      return ClientContext.getModule(AnimationsModule.class).isStaticPlayerAnimationEnabled()
             && entity instanceof Player
          ? true
          : entity.isPassenger();
@@ -153,11 +151,11 @@ public abstract class LivingEntityRendererMixin implements ClientAccess {
    private void limitWardenRendering(
       LivingEntityRenderState renderState, PoseStack poses, SubmitNodeCollector collector, CameraRenderState cameraState, CallbackInfo callback
    ) {
-      int maximumDistance = noRenderModule.wardenDistanceSetting.getValue();
+      int maximumDistance = ClientContext.getModule(NoRenderModule.class).wardenDistanceSetting.getValue();
       Minecraft client = Minecraft.getInstance();
       if (renderState instanceof WardenRenderState
-         && noRenderModule.isToggled()
-         && noRenderModule.wardensSetting.getValue()
+         && ClientContext.getModule(NoRenderModule.class).isToggled()
+         && ClientContext.getModule(NoRenderModule.class).wardensSetting.getValue()
          && new Vec3(renderState.x, renderState.y, renderState.z).distanceToSqr(client.gameRenderer.getMainCamera().position()) > maximumDistance * maximumDistance) {
          callback.cancel();
       }
@@ -165,8 +163,8 @@ public abstract class LivingEntityRendererMixin implements ClientAccess {
 
    @ModifyExpressionValue(method = "getOverlayCoords", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/texture/OverlayTexture;v(Z)I"))
    private static int suppressHurtOverlay(int originalOverlay) {
-      return noRenderModule.isToggled()
-            && noRenderModule.hurtSetting.getValue()
+      return ClientContext.getModule(NoRenderModule.class).isToggled()
+            && ClientContext.getModule(NoRenderModule.class).hurtSetting.getValue()
          ? 10
          : originalOverlay;
    }

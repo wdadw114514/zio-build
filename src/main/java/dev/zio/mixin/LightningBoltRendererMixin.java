@@ -26,7 +26,6 @@ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 @Mixin(LightningBoltRenderer.class)
 public final class LightningBoltRendererMixin {
-   private static final KillEffectsModule killEffectsModule = ClientContext.getModule(KillEffectsModule.class);
    @Unique
    private static LightningBolt renderedLightningBolt;
 
@@ -41,9 +40,9 @@ public final class LightningBoltRendererMixin {
    private static void overrideClientLightningTint(Args arguments) {
       if (renderedLightningBolt != null) {
          if (((ClientLightningState)renderedLightningBolt).zio$isClient()
-            && killEffectsModule.isToggled()
-            && killEffectsModule.thunderSetting.getValue()) {
-            Color lightningColor = killEffectsModule.colorSetting.getValue();
+            && ClientContext.getModule(KillEffectsModule.class).isToggled()
+            && ClientContext.getModule(KillEffectsModule.class).thunderSetting.getValue()) {
+            Color lightningColor = ClientContext.getModule(KillEffectsModule.class).colorSetting.getValue();
             arguments.set(0, lightningColor.getRed() / 255.0F);
             arguments.set(1, lightningColor.getGreen() / 255.0F);
             arguments.set(

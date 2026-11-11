@@ -40,8 +40,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(DisconnectedScreen.class)
 public class DisconnectedScreenMixin extends Screen {
-   private static final AutoReconnectModule autoReconnectModule = ClientContext.getModule(AutoReconnectModule.class);
-   private static final UIModule uiModule = ClientContext.getModule(UIModule.class);
    @Unique
    private long reconnectTimerStartMillis;
    @Shadow
@@ -75,11 +73,11 @@ public class DisconnectedScreenMixin extends Screen {
       Builder autoReconnectBuilder = Button.builder(
             Component.literal("AutoReconnect"),
             button -> {
-               if (!autoReconnectModule.isToggled()) {
+               if (!ClientContext.getModule(AutoReconnectModule.class).isToggled()) {
                   ClientContext.serverStateManager.autoLogged = false;
                }
 
-               autoReconnectModule.toggle();
+               ClientContext.getModule(AutoReconnectModule.class).toggle();
                this.reconnectTimerStartMillis = System.currentTimeMillis();
                button.setFocused(false);
             }
@@ -134,10 +132,10 @@ public class DisconnectedScreenMixin extends Screen {
    @Override
    public boolean keyPressed(KeyEvent keyEvent) {
       if (keyEvent.key()
-            == uiModule.getKeybind()
+            == ClientContext.getModule(UIModule.class).getKeybind()
                .code()
          && !(this.getFocused() instanceof EditBox)) {
-         uiModule.enable();
+         ClientContext.getModule(UIModule.class).enable();
          ClientContext.getClickGui()
             .open();
          return false;
@@ -164,9 +162,9 @@ public class DisconnectedScreenMixin extends Screen {
    }
 
    private void tryAutoReconnect() {
-      if (autoReconnectModule.isToggled()) {
+      if (ClientContext.getModule(AutoReconnectModule.class).isToggled()) {
          float remainingSeconds = this.getReconnectSecondsRemaining(
-            autoReconnectModule
+            ClientContext.getModule(AutoReconnectModule.class)
          );
          if (!(remainingSeconds > 0.0F)) {
             ServerData serverData = ClientContext.serverStateManager.getServerData();
@@ -180,10 +178,10 @@ public class DisconnectedScreenMixin extends Screen {
    private Component getAutoReconnectButtonMessage() {
       MutableComponent message = Component.literal("AutoReconnect ");
       String reasonText = this.details.reason().getString();
-      boolean showCountdown = autoReconnectModule.isToggled()
+      boolean showCountdown = ClientContext.getModule(AutoReconnectModule.class).isToggled()
          && (!reasonText.contains("Zio") || !reasonText.contains("[AutoLog]"));
       float remainingSeconds = this.getReconnectSecondsRemaining(
-         autoReconnectModule
+         ClientContext.getModule(AutoReconnectModule.class)
       );
       if (ClientContext.serverStateManager.autoLogged
          )

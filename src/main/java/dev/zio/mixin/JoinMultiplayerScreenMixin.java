@@ -28,8 +28,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(JoinMultiplayerScreen.class)
 public class JoinMultiplayerScreenMixin extends Screen {
-   private static final FakeVanillaModule fakeVanillaModule = ClientContext.getModule(FakeVanillaModule.class);
-   private static final UIModule uiModule = ClientContext.getModule(UIModule.class);
 
    protected JoinMultiplayerScreenMixin(Component title) {
       super(title);
@@ -43,9 +41,9 @@ public class JoinMultiplayerScreenMixin extends Screen {
                2,
                6
             )
-            .selected(fakeVanillaModule.isToggled())
+            .selected(ClientContext.getModule(FakeVanillaModule.class).isToggled())
             .onValueChange(
-               (checkbox, isSelected) -> fakeVanillaModule.setToggled(
+               (checkbox, isSelected) -> ClientContext.getModule(FakeVanillaModule.class).setToggled(
                   isSelected
                )
             );
@@ -59,11 +57,11 @@ public class JoinMultiplayerScreenMixin extends Screen {
    ) {
       if (!(this.getFocused() instanceof EditBox)) {
          if (keyEvent.key()
-            == uiModule.getKeybind()
+            == ClientContext.getModule(UIModule.class).getKeybind()
                .code()) {
             callback.setReturnValue(false);
             callback.cancel();
-            uiModule.enable();
+            ClientContext.getModule(UIModule.class).enable();
             ClientContext.getClickGui()
                .open();
          }

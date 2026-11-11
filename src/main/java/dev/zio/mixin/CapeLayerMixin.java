@@ -18,7 +18,6 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(CapeLayer.class)
 public class CapeLayerMixin {
-   private static final NoRenderModule noRenderModule = ClientContext.getModule(NoRenderModule.class);
 
    @ModifyExpressionValue(
       method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/renderer/entity/state/AvatarRenderState;FF)V",
@@ -29,6 +28,6 @@ public class CapeLayerMixin {
       )
    )
    private boolean applyCapeOpacity(boolean hasCapeLayer) {
-      return noRenderModule.getArmorOpacity() != 0.0F && hasCapeLayer;
+      return ClientContext.getModule(NoRenderModule.class).getArmorOpacity() != 0.0F && hasCapeLayer;
    }
 }

@@ -21,13 +21,12 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(WeatherEffectRenderer.class)
 public class WeatherEffectRendererMixin implements ClientAccess {
-   private static final AmbienceModule ambienceModule = ClientContext.getModule(AmbienceModule.class);
 
    @ModifyExpressionValue(method = "renderInstances", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/ARGB;white(F)I"))
    private int zio$applyWeatherOpacity(int originalColor) {
-      if (ambienceModule.isToggled()
-         && ambienceModule.worldWeatherSetting.getValue()) {
-         float opacityMultiplier = (ambienceModule.opacitySetting.getValue())
+      if (ClientContext.getModule(AmbienceModule.class).isToggled()
+         && ClientContext.getModule(AmbienceModule.class).worldWeatherSetting.getValue()) {
+         float opacityMultiplier = (ClientContext.getModule(AmbienceModule.class).opacitySetting.getValue())
                .intValue()
             / 100.0F;
          int adjustedAlpha = (int)(ARGB.alpha(originalColor) * opacityMultiplier) & 0xFF;
@@ -42,10 +41,10 @@ public class WeatherEffectRendererMixin implements ClientAccess {
       at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getHeight(Lnet/minecraft/world/level/levelgen/Heightmap$Types;II)I")
    )
    private int zio$forceWeatherBelowSurface(int originalHeight) {
-      return ambienceModule.isToggled()
-            && ambienceModule.worldWeatherSetting.getValue()
-            && ambienceModule.weatherAlwaysSetting.getValue()
-            && (ambienceModule.weatherSetting.getValue()).supportsPrecipitation()
+      return ClientContext.getModule(AmbienceModule.class).isToggled()
+            && ClientContext.getModule(AmbienceModule.class).worldWeatherSetting.getValue()
+            && ClientContext.getModule(AmbienceModule.class).weatherAlwaysSetting.getValue()
+            && (ClientContext.getModule(AmbienceModule.class).weatherSetting.getValue()).supportsPrecipitation()
          ? Integer.MIN_VALUE
          : originalHeight;
    }
@@ -55,11 +54,11 @@ public class WeatherEffectRendererMixin implements ClientAccess {
       at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/biome/Biome;getPrecipitationAt(Lnet/minecraft/core/BlockPos;I)Lnet/minecraft/world/level/biome/Biome$Precipitation;")
    )
    private Precipitation zio$overridePrecipitation(Precipitation originalPrecipitation) {
-      Precipitation configuredPrecipitation = (ambienceModule.weatherSetting
+      Precipitation configuredPrecipitation = (ClientContext.getModule(AmbienceModule.class).weatherSetting
             .getValue())
          .getPrecipitation();
-      return ambienceModule.isToggled()
-            && ambienceModule.worldWeatherSetting.getValue()
+      return ClientContext.getModule(AmbienceModule.class).isToggled()
+            && ClientContext.getModule(AmbienceModule.class).worldWeatherSetting.getValue()
             && configuredPrecipitation != null
          ? configuredPrecipitation
          : originalPrecipitation;

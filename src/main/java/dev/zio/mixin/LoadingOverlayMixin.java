@@ -43,7 +43,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(LoadingOverlay.class)
 public abstract class LoadingOverlayMixin extends Overlay {
-   private static final SettingsModule settingsModule = ClientContext.getModule(SettingsModule.class);
    @Shadow
    private long fadeOutStart;
    @Shadow
@@ -102,7 +101,7 @@ public abstract class LoadingOverlayMixin extends Overlay {
             }
          }
 
-         NamedIdentifier startupSound = settingsModule.getStartupSound();
+         NamedIdentifier startupSound = ClientContext.getModule(SettingsModule.class).getStartupSound();
          Calendar calendar = Calendar.getInstance();
          calendar.setTime(new Date());
          if (calendar.get(Calendar.MONTH) == Calendar.OCTOBER

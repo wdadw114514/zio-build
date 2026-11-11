@@ -73,9 +73,19 @@ public final class Lang {
       return table.translateFragments(text);
    }
 
+   private static boolean hasAsciiLetter(String text) {
+      for (int i = 0; i < text.length(); i++) {
+         char c = text.charAt(i);
+         if (c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z') {
+            return true;
+         }
+      }
+      return false;
+   }
+
    /** Translates a raw string, returning it untouched when no entry exists. */
    public static String tr(String text) {
-      if (text == null || text.isEmpty()) {
+      if (text == null || text.length() < 3 || !hasAsciiLetter(text)) {
          return text;
       }
       String cached = CACHE.get(text);
@@ -91,7 +101,7 @@ public final class Lang {
 
    /** Same as {@link #tr(String)} but also translates phrases inside composed chat messages. */
    public static String trChat(String text) {
-      if (text == null || text.isEmpty()) {
+      if (text == null || text.length() < 3 || !hasAsciiLetter(text)) {
          return text;
       }
       LanguageTable table = ClientContext.languageTable;
@@ -108,31 +118,64 @@ public final class Lang {
       return table.translateFragments(text);
    }
 
-   private static MutableComponent translate(Component component, boolean chat) {
+   /**
+    * Rebuilds a component tree with translated leaves. Returns {@code null} when nothing
+    * changed so that callers can keep the original instance and avoid per-frame garbage.
+    */
+   private static MutableComponent translateOrNull(Component component, boolean chat) {
       if (component == null) {
          return null;
       }
-      MutableComponent result;
-      if (component.getContents() instanceof PlainTextContents plain) {
-         String text = chat ? trChat(plain.text()) : tr(plain.text());
-         result = Component.literal(text).withStyle(component.getStyle());
-      } else {
-         result = MutableComponent.create(component.getContents()).withStyle(component.getStyle());
+
+      String replacement = null;
+      boolean plainText = component.getContents() instanceof PlainTextContents;
+      if (plainText) {
+         String original = ((PlainTextContents)component.getContents()).text();
+         String candidate = chat ? trChat(original) : tr(original);
+         if (!candidate.equals(original)) {
+            replacement = candidate;
+         }
       }
+
+      boolean changed = replacement != null;
+      if (!changed) {
+         for (Component sibling : component.getSiblings()) {
+            if (translateOrNull(sibling, chat) != null) {
+               changed = true;
+               break;
+            }
+         }
+      }
+      if (!changed) {
+         return null;
+      }
+
+      MutableComponent result = replacement != null
+            ? Component.literal(replacement).withStyle(component.getStyle())
+            : MutableComponent.create(component.getContents()).withStyle(component.getStyle());
       for (Component sibling : component.getSiblings()) {
-         result.append(translate(sibling, chat));
+         MutableComponent translated = translateOrNull(sibling, chat);
+         result.append(translated != null ? translated : sibling);
       }
       return result;
    }
 
    /** Translates a component tree leaf by leaf, keeping styles and non-literal contents intact. */
-   public static MutableComponent translate(Component component) {
-      return translate(component, false);
+   public static Component translate(Component component) {
+      if (component == null) {
+         return null;
+      }
+      MutableComponent translated = translateOrNull(component, false);
+      return translated != null ? translated : component;
    }
 
    /** Component variant that also runs phrase replacement, used for chat output. */
-   public static MutableComponent translateChat(Component component) {
-      return translate(component, true);
+   public static Component translateChat(Component component) {
+      if (component == null) {
+         return null;
+      }
+      MutableComponent translated = translateOrNull(component, true);
+      return translated != null ? translated : component;
    }
 
    /** Convenience factory mirroring {@link Component#literal(String)} with localization. */

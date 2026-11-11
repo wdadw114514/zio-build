@@ -34,8 +34,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(FogRenderer.class)
 public abstract class FogRendererMixin {
-   private static final NoRenderModule noRenderModule = ClientContext.getModule(NoRenderModule.class);
-   private static final SkyboxModule skyboxModule = ClientContext.getModule(SkyboxModule.class);
    @Unique
    private SkyboxModule.FogDistances capturedFogDistances;
 
@@ -60,16 +58,16 @@ public abstract class FogRendererMixin {
    private void applyNoRenderFogSettings(
       Camera camera, int renderDistance, DeltaTracker deltaTracker, float ignoredSetupFloat, ClientLevel level, CallbackInfoReturnable<Vector4f> callback, @Local Vector4f fogColor, @Local FogData fogData
    ) {
-      if (noRenderModule.isToggled()
-         && noRenderModule.fogSetting.getValue()) {
-         noRenderModule.applyFogSettings(
+      if (ClientContext.getModule(NoRenderModule.class).isToggled()
+         && ClientContext.getModule(NoRenderModule.class).fogSetting.getValue()) {
+         ClientContext.getModule(NoRenderModule.class).applyFogSettings(
             fogData, renderDistance
          );
       }
 
-      if (skyboxModule.isToggled()
-         && skyboxModule.isCurrentDimensionEnabled()) {
-         Color configuredColor = skyboxModule.fogSetting.getValue();
+      if (ClientContext.getModule(SkyboxModule.class).isToggled()
+         && ClientContext.getModule(SkyboxModule.class).isCurrentDimensionEnabled()) {
+         Color configuredColor = ClientContext.getModule(SkyboxModule.class).fogSetting.getValue();
          float red = configuredColor.getRed() / 255.0F;
          float green = configuredColor.getGreen() / 255.0F;
          float blue = configuredColor.getBlue() / 255.0F;
@@ -82,16 +80,16 @@ public abstract class FogRendererMixin {
    private void updateSplitSkyFogBuffer(
       Camera camera, int renderDistance, DeltaTracker deltaTracker, float ignoredSetupFloat, ClientLevel level, CallbackInfoReturnable<Vector4f> callback
    ) {
-      if (skyboxModule.isToggled()
-         && skyboxModule.splitFogSetting.getValue()
+      if (ClientContext.getModule(SkyboxModule.class).isToggled()
+         && ClientContext.getModule(SkyboxModule.class).splitFogSetting.getValue()
          && this.capturedFogDistances != null) {
-         Color backgroundColor = skyboxModule.backgroundSetting.getValue();
+         Color backgroundColor = ClientContext.getModule(SkyboxModule.class).backgroundSetting.getValue();
          Vector4f skyColor = new Vector4f(backgroundColor.getRed(), backgroundColor.getGreen(), backgroundColor.getBlue(), backgroundColor.getAlpha()).div(255.0F);
 
          try (MappedView mappedBuffer = RenderSystem.getDevice()
                .createCommandEncoder()
                .mapBuffer(
-                  skyboxModule.getSkyFogBuffer()
+                  ClientContext.getModule(SkyboxModule.class).getSkyFogBuffer()
                      .currentBuffer(),
                   false,
                   true

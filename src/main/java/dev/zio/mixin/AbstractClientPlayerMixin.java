@@ -38,7 +38,6 @@ public abstract class AbstractClientPlayerMixin extends Player {
    private static final Identifier protectedSkinTexture = Identifier.fromNamespaceAndPath(
       "zio-mount", "textures/skin_protect.png"
    );
-   private static final NameProtectModule nameProtectModule = ClientContext.getModule(NameProtectModule.class);
    @Unique
    private static final List<CapeEntry> playerCapes = List.of(
       new CapeEntry("cattyyyn", "pepsi.png"), new CapeEntry("u3o", "tetris.png"), new CapeEntry("asphyxia1337", "suckmy.png")
@@ -54,15 +53,15 @@ public abstract class AbstractClientPlayerMixin extends Player {
       PlayerSkin originalSkin = (PlayerSkin)callback.getReturnValue();
       Texture bodyTexture = originalSkin.body();
       PlayerModelType modelType = originalSkin.model();
-      if (nameProtectModule.isToggled()
-         && nameProtectModule.skinSetting.getValue()
+      if (ClientContext.getModule(NameProtectModule.class).isToggled()
+         && ClientContext.getModule(NameProtectModule.class).skinSetting.getValue()
          && localPlayer.getGameProfile().name().equals(this.getGameProfile().name())) {
          bodyTexture = new ResourceTexture(
             protectedSkinTexture,
             protectedSkinTexture
          );
          modelType = PlayerModelType.WIDE;
-         if (nameProtectModule.slimSetting.getValue()) {
+         if (ClientContext.getModule(NameProtectModule.class).slimSetting.getValue()) {
             modelType = PlayerModelType.SLIM;
          }
 

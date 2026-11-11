@@ -33,8 +33,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(TitleScreen.class)
 public class TitleScreenMixin extends Screen {
    private static WatermarkModule watermarkModule = ClientContext.getModule(WatermarkModule.class);
-   private static final HUDModule hudModule = ClientContext.getModule(HUDModule.class);
-   private static final UIModule uiModule = ClientContext.getModule(UIModule.class);
 
    protected TitleScreenMixin(Component title) {
       super(title);
@@ -46,7 +44,7 @@ public class TitleScreenMixin extends Screen {
    ) {
       if (!PanicCommand.unloaded) {
          Minecraft client = ClientAccess.zioMinecraft;
-         int hudColor = (hudModule.fadeSetting.getValue()).getColor(hudModule, 0.0F).getRGB();
+         int hudColor = (ClientContext.getModule(HUDModule.class).fadeSetting.getValue()).getColor(ClientContext.getModule(HUDModule.class), 0.0F).getRGB();
          String versionText = ChatFormatting.WHITE + watermarkModule.getVersionText();
          graphics.drawString(
             client.font,
@@ -60,8 +58,8 @@ public class TitleScreenMixin extends Screen {
 
    @Override
    public boolean keyPressed(KeyEvent keyEvent) {
-      if (!uiModule.getKeybind().mouse() && uiModule.getKeybind().code() == keyEvent.key()) {
-         uiModule.enable();
+      if (!ClientContext.getModule(UIModule.class).getKeybind().mouse() && ClientContext.getModule(UIModule.class).getKeybind().code() == keyEvent.key()) {
+         ClientContext.getModule(UIModule.class).enable();
          ClientContext.getClickGui().open();
       }
 

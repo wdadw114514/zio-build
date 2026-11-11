@@ -29,13 +29,11 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(targets = "net/minecraft/client/gui/components/ChatComponent$1")
 public class ChatComponent1Mixin {
-   private static final NoRenderModule noRenderModule = ClientContext.getModule(NoRenderModule.class);
-   private static final BetterChatModule betterChatModule = ClientContext.getModule(BetterChatModule.class);
 
    @ModifyExpressionValue(method = "accept", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/GuiMessage$Line;tag()Lnet/minecraft/client/GuiMessageTag;"))
    private GuiMessageTag hideMessageIndicator(GuiMessageTag originalTag) {
-      return noRenderModule.isToggled()
-            && noRenderModule.messageIndicatorSetting.getValue()
+      return ClientContext.getModule(NoRenderModule.class).isToggled()
+            && ClientContext.getModule(NoRenderModule.class).messageIndicatorSetting.getValue()
          ? null
          : originalTag;
    }
@@ -47,35 +45,35 @@ public class ChatComponent1Mixin {
       ChatLineAccess lineAccess = (ChatLineAccess)(Object)line;
       Minecraft minecraft = Minecraft.getInstance();
       int offsetX = 0;
-      offsetX -= noRenderModule.isToggled()
-            && noRenderModule.messageIndicatorSetting.getValue()
+      offsetX -= ClientContext.getModule(NoRenderModule.class).isToggled()
+            && ClientContext.getModule(NoRenderModule.class).messageIndicatorSetting.getValue()
          ? 3
          : 0;
-      if (betterChatModule.isAnimationEnabled()) {
+      if (ClientContext.getModule(BetterChatModule.class).isAnimationEnabled()) {
          lineAccess.getProgress()
             .setTarget(
                true
             );
          float progress = lineAccess.getProgress().updateAndGet();
          long addedAtMillis = lineAccess.zio$getAddTime();
-         boolean animateBothAxes = betterChatModule.typeSetting.getValue()
+         boolean animateBothAxes = ClientContext.getModule(BetterChatModule.class).typeSetting.getValue()
             == BetterChatModule.TypeChoice.BOTH;
-         if (betterChatModule.typeSetting.getValue()
+         if (ClientContext.getModule(BetterChatModule.class).typeSetting.getValue()
                == BetterChatModule.TypeChoice.VERTICAL
             || animateBothAxes) {
             messageY = (int)(messageY + 9.0F * (1.0F - progress));
          }
 
-         if (betterChatModule.typeSetting.getValue()
+         if (ClientContext.getModule(BetterChatModule.class).typeSetting.getValue()
                == BetterChatModule.TypeChoice.HORIZONTAL
             || animateBothAxes) {
             offsetX = (int)(offsetX - minecraft.font.width(text) * (1.0F - progress));
          }
 
-         if (betterChatModule.alphaSetting.getValue() != 0) {
+         if (ClientContext.getModule(BetterChatModule.class).alphaSetting.getValue() != 0) {
             float fadeProgress = Mth.clamp(
                (float)(System.currentTimeMillis() - addedAtMillis)
-                  / (betterChatModule.alphaSetting.getValue())
+                  / (ClientContext.getModule(BetterChatModule.class).alphaSetting.getValue())
                      .intValue(),
                0.0F,
                1.0F

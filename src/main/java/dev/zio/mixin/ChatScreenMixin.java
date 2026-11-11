@@ -51,9 +51,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ChatScreen.class)
 public abstract class ChatScreenMixin extends Screen {
-   private static final FontsModule fontsModule = ClientContext.getModule(FontsModule.class);
-   private static final BetterChatModule betterChatModule = ClientContext.getModule(BetterChatModule.class);
-   private static final HUDModule hudModule = ClientContext.getModule(HUDModule.class);
    @Shadow
    protected EditBox input;
    @Shadow
@@ -68,8 +65,8 @@ public abstract class ChatScreenMixin extends Screen {
 
    @Inject(method = "init()V", at = @At("HEAD"))
    private void resetChatLineAnimations(CallbackInfo callback) {
-      if (betterChatModule.alwaysSetting.getValue()
-         && betterChatModule.isAnimationEnabled()) {
+      if (ClientContext.getModule(BetterChatModule.class).alwaysSetting.getValue()
+         && ClientContext.getModule(BetterChatModule.class).isAnimationEnabled()) {
          for (Line line : Minecraft.getInstance().gui.getChat().trimmedMessages) {
             ((ChatLineAccess)(Object)line)
                .getProgress()
@@ -92,7 +89,7 @@ public abstract class ChatScreenMixin extends Screen {
    private boolean allowChatSuperclassRender(
       Screen screen, GuiGraphics graphics, int mouseX, int mouseY, float partialTick
    ) {
-      return hudModule.getChatInputOffset()
+      return ClientContext.getModule(HUDModule.class).getChatInputOffset()
             / 12.0F
          > MathConstants.ONE_QUARTER;
    }
@@ -161,8 +158,8 @@ public abstract class ChatScreenMixin extends Screen {
    private Style findCustomFontClickedStyle(
       Style originalStyle, @Local(argsOnly = true) MouseButtonEvent mouseEvent
    ) {
-      if (fontsModule.isToggled()
-         && fontsModule.chatSetting.getValue()) {
+      if (ClientContext.getModule(FontsModule.class).isToggled()
+         && ClientContext.getModule(FontsModule.class).chatSetting.getValue()) {
          int screenHeight = this.minecraft.getWindow().getGuiScaledHeight();
          FontActiveTextCollector.ClickableStyleFinder styleFinder = new FontActiveTextCollector.ClickableStyleFinder(mouseEvent.x(), mouseEvent.y(), this.insertionClickMode());
          this.minecraft.gui.getChat().captureClickableText(styleFinder, screenHeight, this.minecraft.gui.getGuiTicks(), true);
