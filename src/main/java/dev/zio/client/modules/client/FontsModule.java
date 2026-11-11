@@ -52,7 +52,7 @@ public class FontsModule extends Module {
    private static final Runnable RELOAD_RENDERER = () -> {
       if (ClientAccess.zioMinecraft.player != null
          || ClientAccess.zioMinecraft.screen instanceof ClientScreen) {
-         FontRenderer.INSTANCE.setRenderer(FontRenderer.INSTANCE.createRenderer());
+         FontRenderer.INSTANCE.rebuildRenderer();
       }
    };
    public final Setting<String> fontSetting;
@@ -150,7 +150,7 @@ public class FontsModule extends Module {
       if (GLFW.glfwGetMouseButton(windowHandle, 0) != 1) {
          AtomicBoolean requestedReloadFlag = reloadRequested;
          if (requestedReloadFlag.get()) {
-            FontRenderer.INSTANCE.setRenderer(FontRenderer.INSTANCE.createRenderer());
+            FontRenderer.INSTANCE.rebuildRenderer();
             boolean clearRequest = false;
             AtomicBoolean reloadFlag = reloadRequested;
             reloadFlag.set(clearRequest);

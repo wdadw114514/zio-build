@@ -50,6 +50,11 @@ public final class AtlasTextRenderer {
    private float cursorX;
    private float cursorY;
 
+   /** Releases the atlas texture so a rebuilt renderer does not leak GPU memory. */
+   public void release() {
+      this.atlas.release();
+   }
+
    public AtlasTextRenderer(FontAtlas atlas) {
       this.atlas = atlas;
    }

@@ -38,7 +38,6 @@ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 @Mixin(EquipmentLayerRenderer.class)
 public class EquipmentLayerRendererMixin {
    @Unique
-   @Unique
    private LayerType currentLayerType;
 
    @Inject(method = "renderLayers(Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/world/item/ItemStack;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/resources/Identifier;II)V", at = @At("HEAD"))

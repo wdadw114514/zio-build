@@ -123,6 +123,15 @@ public final class FontRenderer implements ClientAccess {
       }
    }
 
+   /** Rebuilds the atlas, releasing the previous one first so VRAM is not leaked. */
+   public void rebuildRenderer() {
+      AtlasTextRenderer previous = this.renderer;
+      if (previous != null) {
+         previous.release();
+      }
+      this.renderer = this.createRenderer();
+   }
+
    public static boolean containsCharacter(String text, int character) {
       for (int index = 0; index < text.length(); index++) {
          if (text.charAt(index) == character) {
