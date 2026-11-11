@@ -23,7 +23,9 @@ import net.minecraft.util.Mth;
 
 public class HudTextListRenderer extends HudWidgetRenderer {
 
-   private static final HUDModule hudSettings = ClientContext.getModule(HUDModule.class);
+   private static HUDModule hudSettings() {
+      return ClientContext.getModule(HUDModule.class);
+   }
    private final List<? extends HudTextRow> rows;
 
    public HudTextListRenderer(HudWidgetModule widget, HudTextRow row) {
@@ -62,8 +64,8 @@ public class HudTextListRenderer extends HudWidgetRenderer {
          width = 50.0F;
          height = this.getHeight();
       }
-      width *= hudSettings.getTextScale();
-      height *= hudSettings.getTextScale();
+      width *= hudSettings().getTextScale();
+      height *= hudSettings().getTextScale();
       float[] dimensions = new float[2];
       dimensions[0] = width;
       dimensions[1] = height;
@@ -73,7 +75,7 @@ public class HudTextListRenderer extends HudWidgetRenderer {
    @Override
    public void render(PoseStack poses, double mouseX, double mouseY) {
       super.render(poses, mouseX, mouseY);
-      float scale = hudSettings.getTextScale();
+      float scale = hudSettings().getTextScale();
       float rowY = this.getContentY(
          this.getHeight() * scale
       );
@@ -96,7 +98,7 @@ public class HudTextListRenderer extends HudWidgetRenderer {
                0.0F
             );
             poses.scale(scale, scale, 1.0F);
-            row.renderRow(poses, 0.0F, 0.0F, rowColor, hudSettings.shouldDrawTextShadow());
+            row.renderRow(poses, 0.0F, 0.0F, rowColor, hudSettings().shouldDrawTextShadow());
             if (easedVisibility != 0.0F) {
                rowY += (this.getHeight() * easedVisibility + 1)
                   * this.getVerticalDirection()

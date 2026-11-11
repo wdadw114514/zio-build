@@ -28,7 +28,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
 public final class FireworksCommand extends Command {
-   private static final FireworksModule fireworksModule = ClientContext.getModule(FireworksModule.class);
+   private static FireworksModule fireworksModule() {
+      return ClientContext.getModule(FireworksModule.class);
+   }
    private int launchTicksRemaining;
 
    public FireworksCommand() {
@@ -65,7 +67,7 @@ public final class FireworksCommand extends Command {
       }
 
       this.withTemporaryRocketSlot(selectedSlot, rocketSlot, useInventorySwap, () -> {
-         ElapsedTimer rocketUseTimer = fireworksModule.rocketUseTimer;
+         ElapsedTimer rocketUseTimer = fireworksModule().rocketUseTimer;
          rocketUseTimer.reset();
          MultiPlayerGameMode gameMode = ClientAccess.zioMinecraft.gameMode;
          LocalPlayer player = ClientAccess.zioMinecraft.player;

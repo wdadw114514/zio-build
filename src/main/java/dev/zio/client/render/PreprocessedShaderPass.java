@@ -15,7 +15,9 @@ import dev.zio.client.modules.render.ShaderModule;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 
 public abstract class PreprocessedShaderPass extends PostProcessShaderPass {
-   private static final ShaderModule shaderModule = ClientContext.getModule(ShaderModule.class);
+   private static ShaderModule shaderModule() {
+      return ClientContext.getModule(ShaderModule.class);
+   }
    private static final RenderTarget PRE_TARGET = RenderTargetRegistry.createRenderTarget("zio_pre_pass");
    protected static final PrePass COVERAGE_PASS = new PrePass("multi/coverage.frag", "u_Coverage", true);
    protected static final PrePass DISTANCE_PASS = new PrePass("multi/distance.frag", "u_Distance", false);
@@ -28,7 +30,7 @@ public abstract class PreprocessedShaderPass extends PostProcessShaderPass {
 
    @Override
    protected void prepareOutput() {
-      if (!shaderModule.shouldSkipHandOutline() && shaderModule.lineWidthSetting.getValue() > 0 && this.prePass != null) {
+      if (!shaderModule().shouldSkipHandOutline() && shaderModule().lineWidthSetting.getValue() > 0 && this.prePass != null) {
          this.prePass.apply(POST_TARGET);
       }
    }
@@ -54,9 +56,9 @@ public abstract class PreprocessedShaderPass extends PostProcessShaderPass {
       @Override
       public void updateUniforms() {
          super.updateUniforms();
-         this.uniforms.set("u_Width", shaderModule.lineWidthSetting.getValue());
+         this.uniforms.set("u_Width", shaderModule().lineWidthSetting.getValue());
          if (this.coverage) {
-            this.uniforms.set("u_Step", shaderModule.qualitySetting.getValue());
+            this.uniforms.set("u_Step", shaderModule().qualitySetting.getValue());
          }
       }
    }

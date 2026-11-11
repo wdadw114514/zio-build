@@ -49,7 +49,9 @@ import net.minecraft.commands.SharedSuggestionProvider;
 
 public final class CommandRegistry extends Registry<Command> implements ClientAccess, JsonConfigurable {
 
-   private static final SettingsModule settingsModule = ClientContext.getModule(SettingsModule.class);
+   private static SettingsModule settingsModule() {
+      return ClientContext.getModule(SettingsModule.class);
+   }
    public static final SharedSuggestionProvider suggestionSource = new ClientSuggestionProvider(
       null, ClientAccess.zioMinecraft, ignored -> true
    );
@@ -214,7 +216,7 @@ public final class CommandRegistry extends Registry<Command> implements ClientAc
       }
       String updatedPrefix = prefix.substring(0, 1);
       commandPrefix = updatedPrefix;
-      Setting<String> prefixSetting = settingsModule.prefixSetting;
+      Setting<String> prefixSetting = settingsModule().prefixSetting;
       prefixSetting.setValue(updatedPrefix);
    }
 
